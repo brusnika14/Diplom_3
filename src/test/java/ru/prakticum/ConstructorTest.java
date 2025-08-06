@@ -16,6 +16,7 @@ import ru.yandex.prakticum.pages.MainPage;
 import java.time.Duration;
 
 import static org.junit.Assert.assertEquals;
+import static ru.yandex.prakticum.pages.Constats.BASE_URL;
 
 public class ConstructorTest {
     @Rule
@@ -37,7 +38,7 @@ public class ConstructorTest {
         mainPage = new MainPage(driver);
 
         // Открытие сайта
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
 
         // Ожидание загрузки страницы
         wait.until(d -> ((JavascriptExecutor)d)

@@ -12,6 +12,7 @@ import ru.yandex.prakticum.pages.*;
 import java.util.Objects;
 
 import static org.junit.Assert.assertTrue;
+import static ru.yandex.prakticum.pages.Constats.BASE_URL;
 
 public class LoginTest {
     @Rule
@@ -51,7 +52,7 @@ public class LoginTest {
     @DisplayName("Вход на главной странице по кнопке Войти в аккаунт")
     @Description("Проверка возможности входа в аккаунт после нажатия на кнопку Войти в аккаунт на главной странице")
     public void loginWithValidCredentials() {
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
         mainPage.clickLoginAccountButton();
         assertTrue(loginPage.isLoginPageDisplayed());
         loginPage.login(TEST_EMAIL, TEST_PASSWORD);
@@ -63,7 +64,7 @@ public class LoginTest {
     @Description("Проверка возможности входа в аккаунт после нажатия на кнопку Личный кабинет на главной странице")
     public void loginMainPageProfileButton() {
         // 1. Открываем главную страницу
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
 
         // 2. Кликаем кнопку "Личный кабинет" (должно перенаправить на страницу входа)
         mainPage.clickPersonalAccountButton();
@@ -94,7 +95,7 @@ public class LoginTest {
 
 
         // 1. Открываем главную страницу
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
 
         // 2. Переходим на страницу входа
         mainPage.clickLoginAccountButton();
@@ -117,7 +118,7 @@ public class LoginTest {
     @Description("Проверка возможности входа через кнопку 'Войти' на странице восстановления пароля")
     public void loginFromPasswordRecoveryPageTest() {
         // 1. Открываем главную страницу
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
 
         // 2. Переходим на страницу входа
         mainPage.clickLoginAccountButton();

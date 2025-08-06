@@ -1,35 +1,45 @@
 package ru.prakticum;
 
-
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.openqa.selenium.WebDriver;
-
+import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.prakticum.utils.DriverFactory;
 import ru.yandex.prakticum.pages.AuthPage;
 import ru.yandex.prakticum.pages.MainPage;
 import ru.yandex.prakticum.pages.RegisterPage;
+import ru.yandex.prakticum.pages.UserApi;
 
-
+import java.time.Duration;
 import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
+import static ru.yandex.prakticum.pages.Constats.BASE_URL;
 
 public class RegisterTest {
     @Rule
     public TestRule driverRule = new DriverFactory();
     private WebDriver driver;
+    private WebDriverWait wait;
     private final Random random = new Random();
+    private UserApi userApi;
+    private String authToken;
+    private String testEmail;
 
     @Before
     public void setUp() {
-        // Получаем драйвер из DriverFactory
         driver = ((DriverFactory) driverRule).getDriver();
+        if (driver == null) {
+            throw new IllegalStateException("Driver not initialized");
+        }
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        userApi = new UserApi();
     }
 
     private String generateRandomName() {
@@ -39,14 +49,14 @@ public class RegisterTest {
 
     private String generateRandomEmail() {
         String[] domains = {"mail.ru", "gmail.com", "yandex.ru", "hotmail.com"};
-        return "user" + System.currentTimeMillis() + "@" + domains[random.nextInt(domains.length)];
+        return "user" + random.nextInt(1000000) + "@" + domains[random.nextInt(domains.length)];
     }
 
     private String generateRandomPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        int length = 6 + random.nextInt(5);
+        int length = 6 + random.nextInt(5); // Пароль от 6 до 10 символов
         StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < length; i++) {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
@@ -55,72 +65,61 @@ public class RegisterTest {
     @Test
     @DisplayName("Успешная регистрация")
     @Description("Проверка возможности регистрации пользователя с валидными данными")
-    public void testRegistrationAndLogin() throws InterruptedException {
-        // Генерация тестовых данных
+    public void testRegistrationAndLogin() {
         String randomName = generateRandomName();
-        String generatedEmail = generateRandomEmail();
+        testEmail = generateRandomEmail();
         String generatedPassword = generateRandomPassword();
 
-        System.out.println("Сгенерированные данные:");
-        System.out.println("Имя: " + randomName);
-        System.out.println("Email: " + generatedEmail);
-        System.out.println("Пароль: " + generatedPassword);
-
-        // Инициализация страниц
         MainPage mainPage = new MainPage(driver);
         AuthPage authPage = new AuthPage(driver);
         RegisterPage registerPage = new RegisterPage(driver);
 
-        // 1. Открываем главную страницу
-        driver.get("https://stellarburgers.nomoreparties.site/");
-
-        // 2. Переходим в личный кабинет
+        driver.get(BASE_URL);
         mainPage.clickLoginAccountButton();
-
-        // 3. Переходим на форму регистрации
         authPage.clickRegisterLink();
+        registerPage.register(randomName, testEmail, generatedPassword);
 
-        // 4. Регистрируем нового пользователя
-        registerPage.register(randomName, generatedEmail, generatedPassword);
-        Thread.sleep(3000);
+        // Получаем токен для последующего удаления
+        Response loginResponse = userApi.loginUser(testEmail, generatedPassword);
+        authToken = userApi.getTokenFromResponse(loginResponse);
 
-        // 5. Переходим на страницу входа
-        driver.get("https://stellarburgers.nomoreparties.site/login");
-
-        // 6. Входим с созданными данными
-        authPage.login(generatedEmail, generatedPassword);
-        Thread.sleep(3000);
+        wait.until(d -> driver.getCurrentUrl().contains("/login"));
+        authPage.login(testEmail, generatedPassword);
+        wait.until(d -> mainPage.isOrderButtonVisible());
     }
+
     @Test
     @DisplayName("Ошибка регистрации")
     @Description("Проверка ошибки при попытке регистрации пользователя с паролем менее 6 символов")
-    public void testPasswordValidationWithRandomData() throws InterruptedException {
-        // Инициализация страниц
+    public void testPasswordValidationWithRandomData() {
         MainPage mainPage = new MainPage(driver);
         AuthPage authPage = new AuthPage(driver);
         RegisterPage registerPage = new RegisterPage(driver);
 
-        // Генерация тестовых данных
         String name = "ТестовоеИмя";
-        String email = "test" + System.currentTimeMillis() + "@example.com";
-        String invalidPassword = "12345"; // Намеренно неверный пароль
+        testEmail = "test" + System.currentTimeMillis() + "@example.com";
+        String invalidPassword = "12345";
 
-        // Шаги теста
-        driver.get("https://stellarburgers.nomoreparties.site/");
+        driver.get(BASE_URL);
         mainPage.clickLoginAccountButton();
         authPage.clickRegisterLink();
-        registerPage.register(name, email, invalidPassword);
+        registerPage.register(name, testEmail, invalidPassword);
 
-        // Проверка
-        assertTrue("Ожидалась ошибка валидации пароля",
-                registerPage.isPasswordErrorDisplayed());
-
-        Thread.sleep(3000);
-
+        wait.until(d -> registerPage.isPasswordErrorDisplayed());
+        assertTrue("Ожидалась ошибка валидации пароля", registerPage.isPasswordErrorDisplayed());
     }
 
     @After
     public void tearDown() {
-        driver.quit();
+        try {
+            // Удаляем пользователя через API, если он был создан
+            if (authToken != null && testEmail != null) {
+                userApi.deleteUser(authToken);
+            }
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 }
