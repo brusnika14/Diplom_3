@@ -12,7 +12,7 @@ import ru.yandex.prakticum.pages.*;
 import java.util.Objects;
 
 import static org.junit.Assert.assertTrue;
-import static ru.yandex.prakticum.pages.Constats.BASE_URL;
+import static ru.yandex.prakticum.pages.Constants.BASE_URL;
 
 public class LoginTest {
     @Rule

@@ -1,8 +1,6 @@
 package ru.yandex.prakticum.pages;
 
 
-
-
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -39,7 +37,7 @@ public class UserApi {
                 .header("Authorization", token)
                 .delete(BASE_URL + "/auth/user");
     }
-
+    @Step("Получение токена из ответа сервера")
     public String getTokenFromResponse(Response response) {
         return response.then().extract().path("accessToken");
     }

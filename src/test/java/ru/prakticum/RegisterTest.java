@@ -20,7 +20,7 @@ import java.time.Duration;
 import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
-import static ru.yandex.prakticum.pages.Constats.BASE_URL;
+import static ru.yandex.prakticum.pages.Constants.BASE_URL;
 
 public class RegisterTest {
     @Rule

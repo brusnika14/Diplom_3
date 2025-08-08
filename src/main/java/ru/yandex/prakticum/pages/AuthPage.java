@@ -21,6 +21,8 @@ public class AuthPage {
     public void clickRegisterLink() {
         driver.findElement(registerLink).click();
     }
+
+
     @Step("Вход в аккаунт")
     public void login(String email, String password) {
         driver.findElement(emailField).sendKeys(email);

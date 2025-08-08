@@ -16,7 +16,7 @@ import ru.yandex.prakticum.pages.MainPage;
 import java.time.Duration;
 
 import static org.junit.Assert.assertEquals;
-import static ru.yandex.prakticum.pages.Constats.BASE_URL;
+import static ru.yandex.prakticum.pages.Constants.BASE_URL;
 
 public class ConstructorTest {
     @Rule

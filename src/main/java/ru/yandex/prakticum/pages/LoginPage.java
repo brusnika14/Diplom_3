@@ -40,17 +40,17 @@ public class LoginPage {
     public void clickLoginButton() {
         wait.until(ExpectedConditions.elementToBeClickable(loginButton)).click();
     }
-    @Step
+    @Step("Авторизация пользователя: email = {email}")
     public void login(String email, String password) {
         enterEmail(email);
         enterPassword(password);
         clickLoginButton();
     }
-
+    @Step("Проверка отображения страницы входа")
     public boolean isLoginPageDisplayed() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle)).isDisplayed();
     }
-
+    @Step("Кликнуть по ссылке 'Зарегистрироваться'")
     public void clickRegisterLink() {
         wait.until(ExpectedConditions.elementToBeClickable(registerLink)).click();
     }
