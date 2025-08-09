@@ -46,3 +46,6 @@ out/
 ## Miscellaneous
 ##############################
 *.log
+# Allure
+.allure/
+target/*!allure-results/
